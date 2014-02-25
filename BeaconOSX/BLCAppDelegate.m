@@ -1,38 +1,9 @@
 //
-//  Copyright (c) 2013, Matthew Robinson
-//  All rights reserved.
-//
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//
-//  1. Redistributions of source code must retain the above copyright notice, this
-//     list of conditions and the following disclaimer.
-//
-//  2. Redistributions in binary form must reproduce the above copyright notice,
-//     this list of conditions and the following disclaimer in the documentation
-//     and/or other materials provided with the distribution.
-//
-//  3. Neither the name of Blended Cocoa nor the names of its contributors may
-//     be used to endorse or promote products derived from this software without
-//     specific prior written permission.
-//
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-//  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-//  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-//  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
-//  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-//  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-//  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-//  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//  POSSIBILITY OF SUCH DAMAGE.
-//
-//
-//
 //  BLCAppDelegate.m
 //  BeaconOSX
 //
 //  Created by Matthew Robinson on 1/11/2013.
+//  Copyright (c) 2013 Blended Cocoa. All rights reserved.
 //
 
 #import "BLCAppDelegate.h"
@@ -40,6 +11,12 @@
 #import <IOBluetooth/IOBluetooth.h>
 
 #import "BLCBeaconAdvertisementData.h"
+
+#pragma mark - Estimote presets
+static NSString const *kEstimoteUUID = @"B9407F30-F5F8-466E-AFF9-25556B57FE6D";
+
+#pragma mark - Kontakt presets
+static NSString const *kKontaktUUID = @"F7826DA6-4FA2-4E98-8024-BC5B71E0893E";
 
 @interface BLCAppDelegate () <CBPeripheralManagerDelegate, NSTextFieldDelegate>
 
@@ -89,7 +66,16 @@
         [self.minorValueTextField setEnabled:YES];
         [self.measuredPowerTextField setEnabled:YES];
     } else {
-        NSUUID *proximityUUID = [[NSUUID alloc] initWithUUIDString:[self.uuidTextField stringValue]];
+        NSString *uuidString = [self.uuidTextField stringValue];
+        if ([[uuidString lowercaseString] isEqualToString:@"estimote"]) {
+            uuidString = kEstimoteUUID;
+        } else if ([[uuidString lowercaseString] isEqualToString:@"kontakt"]) {
+            uuidString = kKontaktUUID;
+        } else {
+            uuidString = [self.uuidTextField stringValue];
+        }
+
+        NSUUID *proximityUUID = [[NSUUID alloc] initWithUUIDString:uuidString];
         
         BLCBeaconAdvertisementData *beaconData = [[BLCBeaconAdvertisementData alloc] initWithProximityUUID:proximityUUID
                                                                                                      major:self.majorValueTextField.integerValue
@@ -103,7 +89,7 @@
         [self.minorValueTextField setEnabled:NO];
         [self.measuredPowerTextField setEnabled:NO];
 
-        [advertisingButton setTitle:@"Stop Broadcasting"];
+        [advertisingButton setTitle:@"stop advertising"];
     }
 }
 
